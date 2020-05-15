@@ -42,15 +42,23 @@ class MyApp extends State<MainPage> {
   bool _isPlayerReady = false;
 
   int index = 0;
-  final List<Map<String, String>> _ids = [
+  List<Map<String, String>> _ids = [
     {
       "title": "1일 1깡 교과서 (이거보고 따라하세요)",
       "artist": "비(Rain)",
       "music": "깡(GGANG)",
       "Publisher": "케비넷 [KBS청주]",
-      "video": 'hpI2A4RTvhs',
+      "dropdownTitle": "뮤직뱅크 - 비",
       "url": "https://www.youtube.com/watch?v=hpI2A4RTvhs&t=186s"
-    }
+    },
+    {
+      "title": "비 RAIN - 깡 GANG Official M/V",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "GENIE MUSIC",
+      "dropdownTitle": "공식 뮤비",
+      "url": "https://www.youtube.com/watch?v=xqFvYsy4wE4"
+    },
   ];
   YoutubePlayerController _controller;
 
@@ -70,7 +78,7 @@ class MyApp extends State<MainPage> {
 
     // 유튜브
     _controller = YoutubePlayerController(
-      initialVideoId: _ids[index]["video"],
+      initialVideoId: YoutubePlayer.convertUrlToId(_ids[index]["url"]),
       flags: YoutubePlayerFlags(
         autoPlay: false,
         disableDragSeek: false,
@@ -112,9 +120,29 @@ class MyApp extends State<MainPage> {
     //     .showDailyAtTime(0, title, contents, time, platform);
   }
 
+  void changeVideo(int idx) {
+    var id = YoutubePlayer.convertUrlToId(_ids[idx]["url"]);
+
+    _controller.load(id);
+    _controller.mute();
+    Future.delayed(const Duration(milliseconds: 1300), () {
+      _controller.pause();
+      _controller.unMute();
+    });
+  }
+
   // 테스트
-  final List<String> items = <String>['1', '2', '3'];
-  String selectedItem = '1';
+
+  bool _value1 = false;
+  bool _value2 = false;
+
+  void _onChanged1(bool value) => setState(() => _value1 = value);
+  void _onChanged2(bool value) => setState(() => _value2 = value);
+
+  void onChangeDrobox(int idx) {
+    setState(() => index = idx);
+    changeVideo(idx);
+  }
 
   // This widget is the root of your application.
   @override
@@ -122,13 +150,10 @@ class MyApp extends State<MainPage> {
     // var mediaQuery = MediaQuery.of(context);
 
     return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.black,
-      ),
-      builder: (BuildContext context, Widget widget) {
-        var mediaQuery = MediaQuery.of(context);
-
-        return DefaultTabController(
+        theme: ThemeData(
+          primaryColor: Colors.black,
+        ),
+        home: DefaultTabController(
           length: 2,
           child: Scaffold(
               appBar: AppBar(
@@ -183,22 +208,31 @@ class MyApp extends State<MainPage> {
                                 children: <Widget>[
                                   Center(
                                     child: DropdownButton<String>(
-                                      value: selectedItem,
-                                      onChanged: (String string) =>
-                                          setState(() => selectedItem = string),
-                                      selectedItemBuilder:
-                                          (BuildContext context) {
-                                        return items.map<Widget>((String item) {
-                                          return Text(item);
-                                        }).toList();
-                                      },
-                                      items: items.map((String item) {
-                                        return DropdownMenuItem<String>(
-                                          child: Text('Log $item'),
-                                          value: item,
-                                        );
-                                      }).toList(),
-                                    ),
+                                        // value: _ids[index]["dropdownTitle"],
+                                        value: index.toString(),
+                                        isExpanded: true,
+                                        onChanged: (String string) =>
+                                            onChangeDrobox(int.parse(string)),
+                                        selectedItemBuilder:
+                                            (BuildContext context) {
+                                          return _ids.map<Widget>(
+                                              (Map<String, String> item) {
+                                            return Text(item["dropdownTitle"]);
+                                          }).toList();
+                                        },
+                                        items:
+                                            _ids.asMap().entries.map((entry) {
+                                          int idx = entry.key;
+                                          Map<String, String> val = entry.value;
+
+                                          return DropdownMenuItem<String>(
+                                            child: Text(val["dropdownTitle"]),
+                                            value: idx.toString(),
+
+                                            // child: Text("0"),
+                                            // value: "0",
+                                          );
+                                        }).toList()),
                                   ),
                                   Padding(
                                     padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
@@ -341,7 +375,7 @@ class MyApp extends State<MainPage> {
                               child: RaisedButton(
                                 child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
                                     style: TextStyle(fontSize: 20)),
-                                onPressed: () => print('RaisedButton'),
+                                onPressed: () => showNotification(),
                               ),
                             ),
                           )),
@@ -349,16 +383,74 @@ class MyApp extends State<MainPage> {
                       ),
                     ),
                     Container(
-                      color: Colors.white,
-                    ),
+                        color: Colors.white,
+                        child: Column(children: <Widget>[
+                          Expanded(
+                            flex: 1,
+                            child: ListView(
+                                padding: EdgeInsets.all(8),
+                                children: <Widget>[
+                                  Row(
+                                    children: <Widget>[
+                                      Expanded(
+                                          flex: 5,
+                                          child: ListTile(
+                                            leading: Icon(
+                                              Icons.notifications,
+                                              color: Colors.grey,
+                                            ),
+                                            title: Text("알람 설정"),
+                                            subtitle:
+                                                Text("하루 일 깡을 알람으로 받아보세요"),
+                                          )),
+                                      Expanded(
+                                          flex: 1,
+                                          child: Switch(
+                                              value: _value1,
+                                              onChanged: _onChanged1)),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Expanded(
+                                          flex: 1,
+                                          child: Icon(
+                                            Icons.timer,
+                                            color: Colors.grey,
+                                          )),
+                                      Expanded(
+                                          flex: 4, child: Text("알람 시간 설정")),
+                                      Expanded(
+                                          flex: 1,
+                                          child: Switch(
+                                              value: _value1,
+                                              onChanged: _onChanged1)),
+                                    ],
+                                  ),
+                                ]),
+                          ),
+                          Container(
+                              height: 60,
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: 60,
+                                  child: RaisedButton(
+                                    child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
+                                        style: TextStyle(fontSize: 20)),
+                                    onPressed: () => showNotification(),
+                                  ),
+                                ),
+                              )),
+                        ])),
                   ],
                 ),
               )),
-        );
-      },
-    );
+        ));
   }
 }
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 // child: Column(
