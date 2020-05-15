@@ -4,20 +4,24 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// void main() => runApp(MyApp());
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() => runApp(MainPage());
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
 
-  // notification
-  var initAndroidSetting = AndroidInitializationSettings('@mipmap/ic_launcher');
-  var initIosSetting = IOSInitializationSettings();
-  var initSetting = InitializationSettings(initAndroidSetting, initIosSetting);
-  await FlutterLocalNotificationsPlugin().initialize(initSetting);
+//   // notification
+//   var initAndroidSetting = AndroidInitializationSettings('@mipmap/ic_launcher');
+//   var initIosSetting = IOSInitializationSettings();
+//   var initSetting = InitializationSettings(initAndroidSetting, initIosSetting);
+//   await FlutterLocalNotificationsPlugin().initialize(initSetting);
 
-  runApp(MyApp());
+//   runApp(MyApp());
+// }
+
+class MainPage extends StatefulWidget {
+  MyApp createState() => MyApp();
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends State<MainPage> {
   YoutubePlayerController _controller = YoutubePlayerController(
     initialVideoId: "hpI2A4RTvhs",
     flags: YoutubePlayerFlags(
@@ -31,30 +35,38 @@ class MyApp extends StatelessWidget {
   );
 
   Future<void> showNotification() async {
-    setNotificatoinSchedule();
+    WidgetsFlutterBinding.ensureInitialized();
 
-    var title = "하루 일 깡";
-    var contents = "아직 하루 일 깡을 하지 않았습니다.";
+    // notification
+    var initAndroidSetting =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initIosSetting = IOSInitializationSettings();
+    var initSetting =
+        InitializationSettings(initAndroidSetting, initIosSetting);
+    await FlutterLocalNotificationsPlugin().initialize(initSetting);
+
+    var title = "재간둥이 비 ☔";
+    var contents = "오늘도 하루 일 깡을 하실 시간입니다. 🕴🕺";
 
     var android = AndroidNotificationDetails(
         'channelId', 'channelName', 'channelDescription');
     var iOS = IOSNotificationDetails();
     var platform = NotificationDetails(android, iOS);
 
-    final prefs = await SharedPreferences.getInstance();
-    final counter = prefs.getString('schedule') ?? '2020-05-15 17:55:00';
+    var time = Time(17, 0, 0);
 
     await FlutterLocalNotificationsPlugin()
-        .schedule(0, title, contents, DateTime.parse(counter), platform);
+        .schedule(0, title, contents, DateTime.now(), platform);
+
+    // await FlutterLocalNotificationsPlugin()
+    //     .showDailyAtTime(0, title, contents, time, platform);
   }
 
-  void setNotificatoinSchedule() async {
-    // obtain shared preferences
-    final prefs = await SharedPreferences.getInstance();
-
-    // set value
-    prefs.setString('schedule', '2020-05-15 18:10:00');
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   showNotification();
+  // }
 
   // This widget is the root of your application.
   @override
