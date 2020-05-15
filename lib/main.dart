@@ -80,6 +80,8 @@ class MyApp extends State<MainPage> {
         // forceHD: true,
       ),
     );
+
+    // 테스트
   }
 
   Future<void> showNotification() async {
@@ -109,6 +111,10 @@ class MyApp extends State<MainPage> {
     // await FlutterLocalNotificationsPlugin()
     //     .showDailyAtTime(0, title, contents, time, platform);
   }
+
+  // 테스트
+  final List<String> items = <String>['1', '2', '3'];
+  String selectedItem = '1';
 
   // This widget is the root of your application.
   @override
@@ -175,6 +181,25 @@ class MyApp extends State<MainPage> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
+                                  Center(
+                                    child: DropdownButton<String>(
+                                      value: selectedItem,
+                                      onChanged: (String string) =>
+                                          setState(() => selectedItem = string),
+                                      selectedItemBuilder:
+                                          (BuildContext context) {
+                                        return items.map<Widget>((String item) {
+                                          return Text(item);
+                                        }).toList();
+                                      },
+                                      items: items.map((String item) {
+                                        return DropdownMenuItem<String>(
+                                          child: Text('Log $item'),
+                                          value: item,
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
                                   Padding(
                                     padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
                                     child: Row(
@@ -334,6 +359,7 @@ class MyApp extends State<MainPage> {
     );
   }
 }
+////////////////////////////////////////////////////////////////////////////////////
 
 // child: Column(
 //   children: <Widget>[
