@@ -4,6 +4,8 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:firebase_admob/firebase_admob.dart';
+
 void main() => runApp(MainPage());
 // void main() async {
 //   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +24,19 @@ class MainPage extends StatefulWidget {
 }
 
 class MyApp extends State<MainPage> {
+  static MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
+    keywords: <String>['flutter', 'firebase', 'admob'],
+    testDevices: <String>[],
+  );
+
+  BannerAd bannerAd = BannerAd(
+      adUnitId: BannerAd.testAdUnitId,
+      size: AdSize.fullBanner,
+      targetingInfo: targetingInfo,
+      listener: (MobileAdEvent event) {
+        print("BannerAd event is $event");
+      });
+
   YoutubePlayerController _controller = YoutubePlayerController(
     initialVideoId: "hpI2A4RTvhs",
     flags: YoutubePlayerFlags(
@@ -33,6 +48,19 @@ class MyApp extends State<MainPage> {
       // forceHD: true,
     ),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    // showNotification();
+    FirebaseAdMob.instance
+        .initialize(appId: "ca-app-pub-4278000043835062~6424902116");
+    bannerAd
+      ..load()
+      ..show(
+        anchorType: AnchorType.bottom,
+      );
+  }
 
   Future<void> showNotification() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -61,12 +89,6 @@ class MyApp extends State<MainPage> {
     // await FlutterLocalNotificationsPlugin()
     //     .showDailyAtTime(0, title, contents, time, platform);
   }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   showNotification();
-  // }
 
   // This widget is the root of your application.
   @override
