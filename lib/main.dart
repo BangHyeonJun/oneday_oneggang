@@ -390,42 +390,76 @@ class MyApp extends State<MainPage> {
                             child: ListView(
                                 padding: EdgeInsets.all(8),
                                 children: <Widget>[
-                                  Row(
-                                    children: <Widget>[
-                                      Expanded(
-                                          flex: 5,
-                                          child: ListTile(
-                                            leading: Icon(
-                                              Icons.notifications,
-                                              color: Colors.grey,
-                                            ),
-                                            title: Text("알람 설정"),
-                                            subtitle:
-                                                Text("하루 일 깡을 알람으로 받아보세요"),
-                                          )),
-                                      Expanded(
-                                          flex: 1,
-                                          child: Switch(
-                                              value: _value1,
-                                              onChanged: _onChanged1)),
-                                    ],
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                      //                   <--- left side
+                                      color: Color.fromRGBO(0, 0, 0, 0.1),
+                                      width: 1.0,
+                                    ))),
+                                    child: Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                            flex: 5,
+                                            child: ListTile(
+                                              leading: Icon(
+                                                Icons.notifications,
+                                                color: Colors.grey,
+                                              ),
+                                              title: Text("알람 설정"),
+                                              subtitle:
+                                                  Text("📫 하루 일 깡을 알람으로 받아보세요"),
+                                            )),
+                                        Expanded(
+                                            flex: 1,
+                                            child: Switch(
+                                                value: _value1,
+                                                onChanged: _onChanged1)),
+                                      ],
+                                    ),
                                   ),
-                                  Row(
-                                    children: <Widget>[
-                                      Expanded(
+                                  Container(
+                                    decoration: BoxDecoration(
+                                        border: Border(
+                                            bottom: BorderSide(
+                                      //                   <--- left side
+                                      color: Color.fromRGBO(0, 0, 0, 0.1),
+                                      width: 1.0,
+                                    ))),
+                                    child: Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                            flex: 5,
+                                            child: ListTile(
+                                              enabled: true,
+                                              leading: Icon(
+                                                Icons.timer,
+                                                color: Colors.grey,
+                                              ),
+                                              title: Text("알람 시간 설정"),
+                                              subtitle:
+                                                  Text("⏰ 알람 받을 시간을 알려주세요"),
+                                            )),
+                                        Expanded(
                                           flex: 1,
-                                          child: Icon(
-                                            Icons.timer,
-                                            color: Colors.grey,
-                                          )),
-                                      Expanded(
-                                          flex: 4, child: Text("알람 시간 설정")),
-                                      Expanded(
-                                          flex: 1,
-                                          child: Switch(
-                                              value: _value1,
-                                              onChanged: _onChanged1)),
-                                    ],
+                                          child: Align(
+                                            alignment: Alignment.center,
+                                            child: InkWell(
+                                              onTap: () => print("클릭됨"),
+                                              child: Text(
+                                                "AM 07:00",
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color.fromRGBO(
+                                                        119, 136, 152, 1)),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
+                                    ),
                                   ),
                                 ]),
                           ),
