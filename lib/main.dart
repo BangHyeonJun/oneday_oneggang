@@ -6,6 +6,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:firebase_admob/firebase_admob.dart';
 
@@ -57,7 +58,7 @@ class MyApp extends State<MainPage> {
   BannerAd bannerAd = BannerAd(
       adUnitId: BannerAd.testAdUnitId,
       size: AdSize.fullBanner,
-      // targetingInfo: targetingInfo,
+      targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {
         print("BannerAd event is $event");
       });
@@ -71,14 +72,15 @@ class MyApp extends State<MainPage> {
   }
 
   void initEvent() async {
-    // 공유 데이터 초기화
-    await initSharedData();
-
     // 동영상 초기화
     initVieoPlayer();
 
     // 광고 초기화
-    initBannerAdv();
+    // initBannerAdv();
+    initRewardAdv();
+
+    // 공유 데이터 초기화
+    await initSharedData();
 
     // 공유데이터에서 필요한 아이템 가져오는 부분
     initSharedIsNotification();
@@ -90,7 +92,7 @@ class MyApp extends State<MainPage> {
   }
 
   // 공유 데이터 초기화
-  void initSharedData() async {
+  Future<void> initSharedData() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
@@ -170,35 +172,53 @@ class MyApp extends State<MainPage> {
   void initBannerAdv() {
     FirebaseAdMob.instance
         .initialize(appId: "ca-app-pub-4278000043835062~6424902116");
-
-    RewardedVideoAd.instance.load(
-        adUnitId: RewardedVideoAd.testAdUnitId, targetingInfo: targetingInfo);
-
-    // RewardedVideoAd.instance.listener =
-    //     (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
-    //   print("Rewarded Video Ad event $event");
-    //   if (event == RewardedVideoAdEvent.rewarded) {
-    //     // here, you can load your website using your webview plugin
-    //   }
-    // };
-  }
-
-  void runRewardAdv() {
-    RewardedVideoAd.instance.show();
   }
 
   // 베너 광고를 실행시킵니다.
   void runBannerAdv() {
     bannerAd
       ..load()
-      ..show(
-        anchorType: AnchorType.bottom,
-      );
+      ..show(anchorType: AnchorType.bottom, anchorOffset: 0);
   }
 
   // 베너 광고를 사라지게 합니다.
   void hideBannerAdv() {
-    bannerAd.dispose();
+    bannerAd..dispose();
+  }
+
+  // 리워드 광고를 초기화 해줍니다.
+  void initRewardAdv() {
+    RewardedVideoAd.instance.load(
+      adUnitId: RewardedVideoAd.testAdUnitId,
+      targetingInfo: targetingInfo,
+    );
+  }
+
+  void initRewardListener() {
+    RewardedVideoAd.instance.listener =
+        (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
+      print("Rewarded Video Ad event $event");
+      if (event == RewardedVideoAdEvent.rewarded) {
+        showToastMsg("아싸~ 오늘은 포카칩이다. 🥔🥔🥔");
+      }
+    };
+  }
+
+  void runRewardAdv() {
+    initRewardListener();
+    RewardedVideoAd.instance.show();
+  }
+
+  // 토스트 메세지를 보여줍니다.
+  void showToastMsg(String msg) {
+    Fluttertoast.showToast(
+        msg: msg,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 3,
+        backgroundColor: Colors.cyan,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 
   // 동영상 플레이어를 초기화 해줍니다.
@@ -220,9 +240,9 @@ class MyApp extends State<MainPage> {
   // 비디오 플레이어에서 어떤 이벤트 발생시 실행되는 함수
   void youtubeVideoListener() {
     if (_controller.value.isFullScreen) {
-      hideBannerAdv();
+      // hideBannerAdv();
     } else {
-      runBannerAdv();
+      // runBannerAdv();
     }
   }
 
@@ -294,7 +314,7 @@ class MyApp extends State<MainPage> {
       result += (hour).toString() + ":";
     }
 
-    if (minute > 10) {
+    if (minute >= 10) {
       result += minute.toString();
     } else {
       result += "0" + minute.toString();
@@ -337,8 +357,9 @@ class MyApp extends State<MainPage> {
                 ),
                 title: Text('Tabs Demo'),
               ),
-              body: Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 60),
+              body: Container(
+                // Padding(
+                // padding: EdgeInsets.fromLTRB(0, 0, 0, 60),
                 child: TabBarView(
                   children: [
                     Container(
@@ -403,9 +424,6 @@ class MyApp extends State<MainPage> {
                                                     child: Text(
                                                         val["dropdownTitle"]),
                                                     value: idx.toString(),
-
-                                                    // child: Text("0"),
-                                                    // value: "0",
                                                   );
                                                 }).toList()),
                                           ),
@@ -567,8 +585,9 @@ class MyApp extends State<MainPage> {
                                   width: double.infinity,
                                   height: 60,
                                   child: RaisedButton(
+                                    color: Colors.amber,
                                     child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
-                                        style: TextStyle(fontSize: 20)),
+                                        style: TextStyle(fontSize: 16)),
                                     onPressed: () => runRewardAdv(),
                                   ),
                                 ),
@@ -677,8 +696,9 @@ class MyApp extends State<MainPage> {
                                   width: double.infinity,
                                   height: 60,
                                   child: RaisedButton(
+                                    color: Colors.amber,
                                     child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
-                                        style: TextStyle(fontSize: 20)),
+                                        style: TextStyle(fontSize: 16)),
                                     onPressed: () => runRewardAdv(),
                                   ),
                                 ),
