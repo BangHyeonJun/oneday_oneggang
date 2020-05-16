@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -21,7 +20,8 @@ class MyApp extends State<MainPage> {
   SharedPreferences _prefs;
 
   // 알림 관련
-  Time notificationTime;
+  Time notificationTime = new Time();
+  String strNotificationTime;
   bool isNotification = false;
   String notificationTitle = "꾸러기 표정 비 ☔";
   String notificationContents = "오늘도 하루 일 깡을 하실 시간입니다. 🕴🕺";
@@ -49,6 +49,7 @@ class MyApp extends State<MainPage> {
   int currVideoIndex = 0;
 
   // 광고 관련
+
   static MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
     keywords: <String>['flutter', 'firebase', 'admob'],
     testDevices: <String>[],
@@ -56,7 +57,7 @@ class MyApp extends State<MainPage> {
   BannerAd bannerAd = BannerAd(
       adUnitId: BannerAd.testAdUnitId,
       size: AdSize.fullBanner,
-      targetingInfo: targetingInfo,
+      // targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {
         print("BannerAd event is $event");
       });
@@ -70,14 +71,16 @@ class MyApp extends State<MainPage> {
   }
 
   void initEvent() async {
+    // 공유 데이터 초기화
+    await initSharedData();
+
     // 동영상 초기화
     initVieoPlayer();
 
     // 광고 초기화
     initBannerAdv();
 
-    // 공유 데이터 초기화
-    await initSharedData();
+    // 공유데이터에서 필요한 아이템 가져오는 부분
     initSharedIsNotification();
     initSharedNotificationTime();
 
@@ -87,7 +90,7 @@ class MyApp extends State<MainPage> {
   }
 
   // 공유 데이터 초기화
-  Future<Void> initSharedData() async {
+  void initSharedData() async {
     _prefs = await SharedPreferences.getInstance();
   }
 
@@ -113,7 +116,7 @@ class MyApp extends State<MainPage> {
     _prefs.setInt("minute", minute);
     _prefs.setInt("second", second);
 
-    notificationTime = Time(hour, minute, second);
+    setState(() => notificationTime = Time(hour, minute, second));
   }
 
   // 공유 데이터에 Notification 설정 여부를 저장합니다.
@@ -130,6 +133,7 @@ class MyApp extends State<MainPage> {
 
   // isNotification에 따라 알람 설정 작업
   void notificationEventForIsNotification() {
+    print(isNotification);
     if (isNotification) {
       showNotification(
           notificationTime, notificationTitle, notificationContents);
@@ -166,11 +170,35 @@ class MyApp extends State<MainPage> {
   void initBannerAdv() {
     FirebaseAdMob.instance
         .initialize(appId: "ca-app-pub-4278000043835062~6424902116");
+
+    RewardedVideoAd.instance.load(
+        adUnitId: RewardedVideoAd.testAdUnitId, targetingInfo: targetingInfo);
+
+    // RewardedVideoAd.instance.listener =
+    //     (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
+    //   print("Rewarded Video Ad event $event");
+    //   if (event == RewardedVideoAdEvent.rewarded) {
+    //     // here, you can load your website using your webview plugin
+    //   }
+    // };
+  }
+
+  void runRewardAdv() {
+    RewardedVideoAd.instance.show();
+  }
+
+  // 베너 광고를 실행시킵니다.
+  void runBannerAdv() {
     bannerAd
       ..load()
       ..show(
         anchorType: AnchorType.bottom,
       );
+  }
+
+  // 베너 광고를 사라지게 합니다.
+  void hideBannerAdv() {
+    bannerAd.dispose();
   }
 
   // 동영상 플레이어를 초기화 해줍니다.
@@ -186,7 +214,16 @@ class MyApp extends State<MainPage> {
         enableCaption: false,
         // forceHD: true,
       ),
-    );
+    )..addListener(youtubeVideoListener);
+  }
+
+  // 비디오 플레이어에서 어떤 이벤트 발생시 실행되는 함수
+  void youtubeVideoListener() {
+    if (_controller.value.isFullScreen) {
+      hideBannerAdv();
+    } else {
+      runBannerAdv();
+    }
   }
 
   // 드랍다운
@@ -217,6 +254,8 @@ class MyApp extends State<MainPage> {
 
   // 알림 시간 픽커를 호출하는 함수
   void onClickSettingTime(BuildContext context) {
+    DateTime now = DateTime.now();
+
     DatePicker.showTimePicker(context,
         showTitleActions: true, locale: LocaleType.ko, onChanged: (date) {
       print('change $date in time zone ' +
@@ -228,7 +267,40 @@ class MyApp extends State<MainPage> {
 
       setNotificationTime(hour, minute, second);
       notificationEventForIsNotification();
-    }, currentTime: DateTime.now());
+    },
+        currentTime: DateTime.utc(
+            now.year,
+            now.month,
+            now.day,
+            notificationTime.hour,
+            notificationTime.minute,
+            notificationTime.second));
+  }
+
+  // 시간을 문자열로 변경해 줍니다.
+  String convertTime2String(Time time) {
+    int hour = time.hour;
+    int minute = time.minute;
+    // int second = time.second;
+
+    String result = "";
+
+    // 시간 계산
+    if (hour > 12) {
+      result += "PM ";
+      result += (hour - 12).toString() + ":";
+    } else {
+      result += "AM ";
+      result += (hour).toString() + ":";
+    }
+
+    if (minute > 10) {
+      result += minute.toString();
+    } else {
+      result += "0" + minute.toString();
+    }
+
+    return result;
   }
 
   // This widget is the root of your application.
@@ -497,7 +569,7 @@ class MyApp extends State<MainPage> {
                                   child: RaisedButton(
                                     child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
                                         style: TextStyle(fontSize: 20)),
-                                    onPressed: () => print("테스트"),
+                                    onPressed: () => runRewardAdv(),
                                   ),
                                 ),
                               )),
@@ -586,8 +658,9 @@ class MyApp extends State<MainPage> {
                                                             173, 181, 189, 0.5),
                                                     fontWeight: FontWeight.w500,
                                                   ),
-                                                  child: Text(notificationTime
-                                                      .toString()),
+                                                  child: Text(
+                                                      convertTime2String(
+                                                          notificationTime)),
                                                 )),
                                           ),
                                         ))
@@ -606,7 +679,7 @@ class MyApp extends State<MainPage> {
                                   child: RaisedButton(
                                     child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
                                         style: TextStyle(fontSize: 20)),
-                                    onPressed: () => print("테스트"),
+                                    onPressed: () => runRewardAdv(),
                                   ),
                                 ),
                               )),
