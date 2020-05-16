@@ -1,48 +1,34 @@
+import 'dart:async';
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:firebase_admob/firebase_admob.dart';
 
-void main() => runApp(MainPage());
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-
-//   // notification
-//   var initAndroidSetting = AndroidInitializationSettings('@mipmap/ic_launcher');
-//   var initIosSetting = IOSInitializationSettings();
-//   var initSetting = InitializationSettings(initAndroidSetting, initIosSetting);
-//   await FlutterLocalNotificationsPlugin().initialize(initSetting);
-
-//   runApp(MyApp());
-// }
+void main() => runApp(new MaterialApp(home: MainPage()));
 
 class MainPage extends StatefulWidget {
   MyApp createState() => MyApp();
 }
 
 class MyApp extends State<MainPage> {
-  static MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
-    keywords: <String>['flutter', 'firebase', 'admob'],
-    testDevices: <String>[],
-  );
+  // 공유 데이터
+  SharedPreferences _prefs;
 
-  BannerAd bannerAd = BannerAd(
-      adUnitId: BannerAd.testAdUnitId,
-      size: AdSize.fullBanner,
-      targetingInfo: targetingInfo,
-      listener: (MobileAdEvent event) {
-        print("BannerAd event is $event");
-      });
+  // 알림 관련
+  Time notificationTime;
+  bool isNotification = false;
+  String notificationTitle = "꾸러기 표정 비 ☔";
+  String notificationContents = "오늘도 하루 일 깡을 하실 시간입니다. 🕴🕺";
 
-  double _volume = 100;
-  bool _muted = false;
-  bool _isPlayerReady = false;
-
-  int index = 0;
-  List<Map<String, String>> _ids = [
+  // 동영상 관련
+  YoutubePlayerController _controller;
+  List<Map<String, String>> videoArr = [
     {
       "title": "1일 1깡 교과서 (이거보고 따라하세요)",
       "artist": "비(Rain)",
@@ -60,14 +46,124 @@ class MyApp extends State<MainPage> {
       "url": "https://www.youtube.com/watch?v=xqFvYsy4wE4"
     },
   ];
-  YoutubePlayerController _controller;
+  int currVideoIndex = 0;
 
+  // 광고 관련
+  static MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
+    keywords: <String>['flutter', 'firebase', 'admob'],
+    testDevices: <String>[],
+  );
+  BannerAd bannerAd = BannerAd(
+      adUnitId: BannerAd.testAdUnitId,
+      size: AdSize.fullBanner,
+      targetingInfo: targetingInfo,
+      listener: (MobileAdEvent event) {
+        print("BannerAd event is $event");
+      });
+
+  // 앱 실행 시 처음 시작되는 부분
   @override
   void initState() {
     super.initState();
-    // showNotification();
 
-    // 애드 몹
+    initEvent();
+  }
+
+  void initEvent() async {
+    // 동영상 초기화
+    initVieoPlayer();
+
+    // 광고 초기화
+    initBannerAdv();
+
+    // 공유 데이터 초기화
+    await initSharedData();
+    initSharedIsNotification();
+    initSharedNotificationTime();
+
+    // 알림 초기화
+    initNotification();
+    notificationEventForIsNotification();
+  }
+
+  // 공유 데이터 초기화
+  Future<Void> initSharedData() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
+
+  // 공유데이터에 알림이 존재하는지를 확인
+  void initSharedNotificationTime() {
+    int hour = _prefs.getInt('hour') ?? 19;
+    int minute = _prefs.getInt('minute') ?? 0;
+    int second = _prefs.getInt('second') ?? 0;
+
+    notificationTime = Time(hour, minute, second);
+  }
+
+  // 공유 데이터에 Notification 설정 여부를 확인
+  void initSharedIsNotification() {
+    bool isNoti = _prefs.getBool('isNotification') ?? true;
+
+    isNotification = isNoti;
+  }
+
+  // 공유 데이터에 notification 시간을 저장합니다.
+  void setNotificationTime(int hour, int minute, int second) {
+    _prefs.setInt("hour", hour);
+    _prefs.setInt("minute", minute);
+    _prefs.setInt("second", second);
+
+    notificationTime = Time(hour, minute, second);
+  }
+
+  // 공유 데이터에 Notification 설정 여부를 저장합니다.
+  void seIstNotification(bool isNoti) {
+    _prefs.setBool("isNotification", isNoti);
+
+    isNotification = isNoti;
+  }
+
+  // notification 초기화
+  void initNotification() async {
+    WidgetsFlutterBinding.ensureInitialized();
+  }
+
+  // isNotification에 따라 알람 설정 작업
+  void notificationEventForIsNotification() {
+    if (isNotification) {
+      showNotification(
+          notificationTime, notificationTitle, notificationContents);
+    } else {
+      removeAllNotification();
+    }
+  }
+
+  // 모든 알림을 지워줍니다.
+  void removeAllNotification() {
+    FlutterLocalNotificationsPlugin().cancelAll();
+  }
+
+  // 알림을 세팅해 줍니다.
+  Future<void> showNotification(
+      Time time, String title, String contents) async {
+    var initAndroidSetting =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initIosSetting = IOSInitializationSettings();
+    var initSetting =
+        InitializationSettings(initAndroidSetting, initIosSetting);
+    await FlutterLocalNotificationsPlugin().initialize(initSetting);
+
+    var android = AndroidNotificationDetails(
+        'channelId', 'channelName', 'channelDescription');
+    var iOS = IOSNotificationDetails();
+    var platform = NotificationDetails(android, iOS);
+
+    await FlutterLocalNotificationsPlugin()
+        .showDailyAtTime(0, title, contents, time, platform);
+  }
+
+  // 베너 광고를 초기화 해줍니다.
+  void initBannerAdv() {
     FirebaseAdMob.instance
         .initialize(appId: "ca-app-pub-4278000043835062~6424902116");
     bannerAd
@@ -75,10 +171,13 @@ class MyApp extends State<MainPage> {
       ..show(
         anchorType: AnchorType.bottom,
       );
+  }
 
-    // 유튜브
+  // 동영상 플레이어를 초기화 해줍니다.
+  void initVieoPlayer() {
     _controller = YoutubePlayerController(
-      initialVideoId: YoutubePlayer.convertUrlToId(_ids[index]["url"]),
+      initialVideoId:
+          YoutubePlayer.convertUrlToId(videoArr[currVideoIndex]["url"]),
       flags: YoutubePlayerFlags(
         autoPlay: false,
         disableDragSeek: false,
@@ -88,40 +187,11 @@ class MyApp extends State<MainPage> {
         // forceHD: true,
       ),
     );
-
-    // 테스트
   }
 
-  Future<void> showNotification() async {
-    WidgetsFlutterBinding.ensureInitialized();
-
-    // notification
-    var initAndroidSetting =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initIosSetting = IOSInitializationSettings();
-    var initSetting =
-        InitializationSettings(initAndroidSetting, initIosSetting);
-    await FlutterLocalNotificationsPlugin().initialize(initSetting);
-
-    var title = "꾸러기 표정 비 ☔";
-    var contents = "오늘도 하루 일 깡을 하실 시간입니다. 🕴🕺";
-
-    var android = AndroidNotificationDetails(
-        'channelId', 'channelName', 'channelDescription');
-    var iOS = IOSNotificationDetails();
-    var platform = NotificationDetails(android, iOS);
-
-    var time = Time(17, 0, 0);
-
-    await FlutterLocalNotificationsPlugin()
-        .schedule(0, title, contents, DateTime.now(), platform);
-
-    // await FlutterLocalNotificationsPlugin()
-    //     .showDailyAtTime(0, title, contents, time, platform);
-  }
-
+  // 드랍다운
   void changeVideo(int idx) {
-    var id = YoutubePlayer.convertUrlToId(_ids[idx]["url"]);
+    var id = YoutubePlayer.convertUrlToId(videoArr[idx]["url"]);
 
     _controller.load(id);
     _controller.mute();
@@ -131,17 +201,34 @@ class MyApp extends State<MainPage> {
     });
   }
 
-  // 테스트
-
-  bool _value1 = false;
-  bool _value2 = false;
-
-  void _onChanged1(bool value) => setState(() => _value1 = value);
-  void _onChanged2(bool value) => setState(() => _value2 = value);
-
+  // 드롭박스가 변경될 시 실행되어지는 함수
   void onChangeDrobox(int idx) {
-    setState(() => index = idx);
+    setState(() => currVideoIndex = idx);
     changeVideo(idx);
+  }
+
+  // 라디오 버튼
+  void onChangeIsNotification(bool value) {
+    setState(() => isNotification = value);
+
+    seIstNotification(value);
+    notificationEventForIsNotification();
+  }
+
+  // 알림 시간 픽커를 호출하는 함수
+  void onClickSettingTime(BuildContext context) {
+    DatePicker.showTimePicker(context,
+        showTitleActions: true, locale: LocaleType.ko, onChanged: (date) {
+      print('change $date in time zone ' +
+          date.timeZoneOffset.inHours.toString());
+    }, onConfirm: (date) {
+      int hour = date.hour;
+      int minute = date.minute;
+      int second = date.second;
+
+      setNotificationTime(hour, minute, second);
+      notificationEventForIsNotification();
+    }, currentTime: DateTime.now());
   }
 
   // This widget is the root of your application.
@@ -186,199 +273,234 @@ class MyApp extends State<MainPage> {
                       color: Colors.white,
                       child: Column(
                         children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                            child: YoutubePlayer(
-                              controller: _controller,
-                              showVideoProgressIndicator: true,
-                              bottomActions: [
-                                CurrentPosition(),
-                                ProgressBar(isExpanded: true),
-                                FullScreenButton(),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: double.infinity,
-                            child: Padding(
-                              padding: EdgeInsets.fromLTRB(14, 10, 14, 0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          Expanded(
+                              flex: 1,
+                              child: ListView(
                                 children: <Widget>[
-                                  Center(
-                                    child: DropdownButton<String>(
-                                        // value: _ids[index]["dropdownTitle"],
-                                        value: index.toString(),
-                                        isExpanded: true,
-                                        onChanged: (String string) =>
-                                            onChangeDrobox(int.parse(string)),
-                                        selectedItemBuilder:
-                                            (BuildContext context) {
-                                          return _ids.map<Widget>(
-                                              (Map<String, String> item) {
-                                            return Text(item["dropdownTitle"]);
-                                          }).toList();
-                                        },
-                                        items:
-                                            _ids.asMap().entries.map((entry) {
-                                          int idx = entry.key;
-                                          Map<String, String> val = entry.value;
+                                  Padding(
+                                    padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                                    child: YoutubePlayer(
+                                      controller: _controller,
+                                      showVideoProgressIndicator: true,
+                                      bottomActions: [
+                                        CurrentPosition(),
+                                        ProgressBar(isExpanded: true),
+                                        FullScreenButton(),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    width: double.infinity,
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.fromLTRB(14, 10, 14, 0),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Center(
+                                            child: DropdownButton<String>(
+                                                // value: videoArr[currVideoIndex]["dropdownTitle"],
+                                                value:
+                                                    currVideoIndex.toString(),
+                                                isExpanded: true,
+                                                onChanged: (String string) =>
+                                                    onChangeDrobox(
+                                                        int.parse(string)),
+                                                selectedItemBuilder:
+                                                    (BuildContext context) {
+                                                  return videoArr.map<Widget>(
+                                                      (Map<String, String>
+                                                          item) {
+                                                    return Text(
+                                                        item["dropdownTitle"]);
+                                                  }).toList();
+                                                },
+                                                items: videoArr
+                                                    .asMap()
+                                                    .entries
+                                                    .map((entry) {
+                                                  int idx = entry.key;
+                                                  Map<String, String> val =
+                                                      entry.value;
 
-                                          return DropdownMenuItem<String>(
-                                            child: Text(val["dropdownTitle"]),
-                                            value: idx.toString(),
+                                                  return DropdownMenuItem<
+                                                      String>(
+                                                    child: Text(
+                                                        val["dropdownTitle"]),
+                                                    value: idx.toString(),
 
-                                            // child: Text("0"),
-                                            // value: "0",
-                                          );
-                                        }).toList()),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 4, 0, 4),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        // 타이틀
-                                        Text(
-                                          "출처 : ",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color.fromRGBO(
-                                                  153, 153, 153, 1)),
-                                        ),
-                                        // 내용
-                                        Flexible(
-                                          child: Text(
-                                            "${_ids[index]['url']}",
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color.fromRGBO(
-                                                    153, 153, 153, 1)),
-                                            overflow: TextOverflow.ellipsis,
+                                                    // child: Text("0"),
+                                                    // value: "0",
+                                                  );
+                                                }).toList()),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 0, 4),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        // 타이틀
-                                        Text(
-                                          "제목 : ",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color.fromRGBO(
-                                                  153, 153, 153, 1)),
-                                        ),
-                                        // 내용
-                                        Flexible(
-                                          child: Text(
-                                            "${_ids[index]['title']}",
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color.fromRGBO(
-                                                    153, 153, 153, 1)),
-                                            overflow: TextOverflow.ellipsis,
+                                          Padding(
+                                            padding:
+                                                EdgeInsets.fromLTRB(0, 4, 0, 4),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: <Widget>[
+                                                // 타이틀
+                                                Text(
+                                                  "출처 : ",
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Color.fromRGBO(
+                                                          153, 153, 153, 1)),
+                                                ),
+                                                // 내용
+                                                Flexible(
+                                                  child: Text(
+                                                    "${videoArr[currVideoIndex]['url']}",
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: Color.fromRGBO(
+                                                            153, 153, 153, 1)),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 0, 4),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        // 타이틀
-                                        Text(
-                                          "음악 : ",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color.fromRGBO(
-                                                  153, 153, 153, 1)),
-                                        ),
-                                        // 내용
-                                        Flexible(
-                                          child: Text(
-                                            "${_ids[index]['artist']} - ${_ids[index]['music']}",
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color.fromRGBO(
-                                                    153, 153, 153, 1)),
-                                            overflow: TextOverflow.ellipsis,
+                                          Padding(
+                                            padding:
+                                                EdgeInsets.fromLTRB(0, 0, 0, 4),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: <Widget>[
+                                                // 타이틀
+                                                Text(
+                                                  "제목 : ",
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Color.fromRGBO(
+                                                          153, 153, 153, 1)),
+                                                ),
+                                                // 내용
+                                                Flexible(
+                                                  child: Text(
+                                                    "${videoArr[currVideoIndex]['title']}",
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: Color.fromRGBO(
+                                                            153, 153, 153, 1)),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 0, 0, 4),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: <Widget>[
-                                        // 타이틀
-                                        Text(
-                                          "게시자 : ",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color.fromRGBO(
-                                                  153, 153, 153, 1)),
-                                        ),
-                                        // 내용
-                                        Flexible(
-                                          child: Text(
-                                            "${_ids[index]['Publisher']}",
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w400,
-                                                color: Color.fromRGBO(
-                                                    153, 153, 153, 1)),
-                                            overflow: TextOverflow.ellipsis,
+                                          Padding(
+                                            padding:
+                                                EdgeInsets.fromLTRB(0, 0, 0, 4),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: <Widget>[
+                                                // 타이틀
+                                                Text(
+                                                  "음악 : ",
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Color.fromRGBO(
+                                                          153, 153, 153, 1)),
+                                                ),
+                                                // 내용
+                                                Flexible(
+                                                  child: Text(
+                                                    "${videoArr[currVideoIndex]['artist']} - ${videoArr[currVideoIndex]['music']}",
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: Color.fromRGBO(
+                                                            153, 153, 153, 1)),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                          Padding(
+                                            padding:
+                                                EdgeInsets.fromLTRB(0, 0, 0, 4),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: <Widget>[
+                                                // 타이틀
+                                                Text(
+                                                  "게시자 : ",
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Color.fromRGBO(
+                                                          153, 153, 153, 1)),
+                                                ),
+                                                // 내용
+                                                Flexible(
+                                                  child: Text(
+                                                    "${videoArr[currVideoIndex]['Publisher']}",
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        color: Color.fromRGBO(
+                                                            153, 153, 153, 1)),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                              child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: SizedBox(
-                              width: double.infinity,
+                              )),
+                          Container(
                               height: 60,
-                              child: RaisedButton(
-                                child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
-                                    style: TextStyle(fontSize: 20)),
-                                onPressed: () => showNotification(),
-                              ),
-                            ),
-                          )),
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  height: 60,
+                                  child: RaisedButton(
+                                    child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
+                                        style: TextStyle(fontSize: 20)),
+                                    onPressed: () => print("테스트"),
+                                  ),
+                                ),
+                              )),
                         ],
                       ),
                     ),
@@ -387,81 +509,92 @@ class MyApp extends State<MainPage> {
                         child: Column(children: <Widget>[
                           Expanded(
                             flex: 1,
-                            child: ListView(
-                                padding: EdgeInsets.all(8),
-                                children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        border: Border(
-                                            bottom: BorderSide(
-                                      //                   <--- left side
-                                      color: Color.fromRGBO(0, 0, 0, 0.1),
-                                      width: 1.0,
-                                    ))),
-                                    child: Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                            flex: 5,
-                                            child: ListTile(
-                                              leading: Icon(
-                                                Icons.notifications,
-                                                color: Colors.grey,
-                                              ),
-                                              title: Text("알람 설정"),
-                                              subtitle:
-                                                  Text("📫 하루 일 깡을 알람으로 받아보세요"),
-                                            )),
-                                        Expanded(
-                                            flex: 1,
-                                            child: Switch(
-                                                value: _value1,
-                                                onChanged: _onChanged1)),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        border: Border(
-                                            bottom: BorderSide(
-                                      //                   <--- left side
-                                      color: Color.fromRGBO(0, 0, 0, 0.1),
-                                      width: 1.0,
-                                    ))),
-                                    child: Row(
-                                      children: <Widget>[
-                                        Expanded(
-                                            flex: 5,
-                                            child: ListTile(
-                                              enabled: true,
-                                              leading: Icon(
-                                                Icons.timer,
-                                                color: Colors.grey,
-                                              ),
-                                              title: Text("알람 시간 설정"),
-                                              subtitle:
-                                                  Text("⏰ 알람 받을 시간을 알려주세요"),
-                                            )),
-                                        Expanded(
-                                          flex: 1,
-                                          child: Align(
-                                            alignment: Alignment.center,
-                                            child: InkWell(
-                                              onTap: () => print("클릭됨"),
-                                              child: Text(
-                                                "AM 07:00",
-                                                style: TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Color.fromRGBO(
-                                                        119, 136, 152, 1)),
-                                              ),
-                                            ),
+                            child:
+                                ListView(padding: EdgeInsets.all(8), children: <
+                                    Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                  //                   <--- left side
+                                  color: Color.fromRGBO(0, 0, 0, 0.1),
+                                  width: 1.0,
+                                ))),
+                                child: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                        flex: 5,
+                                        child: ListTile(
+                                          leading: Icon(
+                                            Icons.notifications,
+                                            color: Colors.grey,
                                           ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ]),
+                                          title: Text("알람 설정"),
+                                          subtitle:
+                                              Text("📫 하루 일 깡을 알람으로 받아보세요"),
+                                        )),
+                                    Expanded(
+                                        flex: 1,
+                                        child: Switch(
+                                            value: isNotification,
+                                            onChanged: onChangeIsNotification)),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: BorderSide(
+                                  //                   <--- left side
+                                  color: Color.fromRGBO(0, 0, 0, 0.1),
+                                  width: 1.0,
+                                ))),
+                                child: Row(
+                                  children: <Widget>[
+                                    Expanded(
+                                        flex: 5,
+                                        child: ListTile(
+                                          enabled: isNotification,
+                                          leading: Icon(
+                                            Icons.timer,
+                                            color: Colors.grey,
+                                          ),
+                                          title: Text("알람 시간 설정"),
+                                          subtitle: Text("⏰ 알람 받을 시간을 알려주세요"),
+                                        )),
+                                    Expanded(
+                                        flex: 1,
+                                        child: Align(
+                                          alignment: Alignment.center,
+                                          child: InkWell(
+                                            splashColor: Colors.grey,
+                                            onTap: () => isNotification
+                                                ? onClickSettingTime(context)
+                                                : {},
+                                            child: Container(
+                                                alignment: Alignment.center,
+                                                height: 60,
+                                                child: AnimatedDefaultTextStyle(
+                                                  duration: const Duration(
+                                                      milliseconds: 250),
+                                                  style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: isNotification
+                                                        ? Color.fromRGBO(
+                                                            119, 136, 152, 1)
+                                                        : Color.fromRGBO(
+                                                            173, 181, 189, 0.5),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                  child: Text(notificationTime
+                                                      .toString()),
+                                                )),
+                                          ),
+                                        ))
+                                  ],
+                                ),
+                              ),
+                            ]),
                           ),
                           Container(
                               height: 60,
@@ -473,7 +606,7 @@ class MyApp extends State<MainPage> {
                                   child: RaisedButton(
                                     child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
                                         style: TextStyle(fontSize: 20)),
-                                    onPressed: () => showNotification(),
+                                    onPressed: () => print("테스트"),
                                   ),
                                 ),
                               )),
@@ -484,62 +617,3 @@ class MyApp extends State<MainPage> {
         ));
   }
 }
-
-////////////////////////////////////////////////////////////////////////////////////
-
-// child: Column(
-//   children: <Widget>[
-//     // 유튜브 관련
-//     Column(
-//       children: <Widget>[
-//         Center(
-//           child: YoutubePlayer(
-//             controller: _controller,
-//             showVideoProgressIndicator: true,
-//             bottomActions: [
-//               CurrentPosition(),
-//               ProgressBar(isExpanded: true),
-//               FullScreenButton(),
-//             ],
-//           ),
-//         ),
-//         Text(
-//           "출처 : 케비넷 [KBS청주]",
-//           style: TextStyle(
-//               fontSize: 12,
-//               color: Color.fromRGBO(153, 153, 153, 1)),
-//         )
-//       ],
-//     ),
-//     Expanded(
-//       child: ListView(
-//         children: <Widget>[Text("테스트")],
-//       ),
-//     ),
-//     SizedBox(
-//         width: double.infinity,
-//         height: 60.0,
-//         child: RaisedButton(
-//             child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
-//                 style: TextStyle(fontSize: 16)),
-//             onPressed: () => print('RaisedButton'))),
-//     SizedBox(
-//       height: 60.0,
-//     )
-//   ],
-// ),
-// Container(
-//   height: 60.0,
-//   child: Column(
-//     children: <Widget>[
-//       RaisedButton(
-//         child: Text('RaisedButton', style: TextStyle(fontSize: 24)),
-//         onPressed: () => print('RaisedButton'),
-//       )
-//     ],
-//   ),
-// )
-// IconButton(
-//   icon: Icon(Icons.add),
-//   onPressed: showNotification,
-// ),
