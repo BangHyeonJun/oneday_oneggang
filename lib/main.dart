@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:firebase_admob/firebase_admob.dart';
 
@@ -35,22 +36,118 @@ class MyApp extends State<MainPage> {
       "artist": "비(Rain)",
       "music": "깡(GGANG)",
       "Publisher": "케비넷 [KBS청주]",
-      "dropdownTitle": "뮤직뱅크 - 비",
-      "url": "https://www.youtube.com/watch?v=hpI2A4RTvhs&t=186s"
+      "dropdownTitle": "1일 1깡 교과서",
+      "url": "https://www.youtube.com/watch?v=hpI2A4RTvhs&t"
     },
     {
       "title": "비 RAIN - 깡 GANG Official M/V",
       "artist": "비(Rain)",
       "music": "깡(GGANG)",
       "Publisher": "GENIE MUSIC",
-      "dropdownTitle": "공식 뮤비",
+      "dropdownTitle": "비 RAIN - 깡 GANG Official M/",
       "url": "https://www.youtube.com/watch?v=xqFvYsy4wE4"
+    },
+    {
+      "title": "[6분 입덕] 비 깡 입덕영상 | 깡 입문러를 위한 깡니버스 친절한 해설서",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "웃긴 댓글 모음집: 웃고 싶을때 오세요",
+      "dropdownTitle": "[6분 입덕] 비 깡 입덕영상",
+      "url": "https://www.youtube.com/watch?v=JiGUCye-aeE"
+    },
+    {
+      "title": "[입덕영상] 비 깡 레전드 댓글 모음집 1탄",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "웃긴 댓글 모음집: 웃고 싶을때 오세요",
+      "dropdownTitle": "비 깡 레전드 댓글 모음집 1탄",
+      "url": "https://www.youtube.com/watch?v=8ITi0ilDe4A"
+    },
+    {
+      "title": "[입덕영상] 비 깡 레전드 댓글 모음집 2탄",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "웃긴 댓글 모음집: 웃고 싶을때 오세요",
+      "dropdownTitle": "비 깡 레전드 댓글 모음집 2탄",
+      "url": "https://www.youtube.com/watch?v=uaPAmKWm_no&t"
+    },
+    {
+      "title": "[입덕영상] 비 깡 레전드 댓글 모음집 3탄",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "웃긴 댓글 모음집: 웃고 싶을때 오세요",
+      "dropdownTitle": "비 깡 레전드 댓글 모음집 3탄",
+      "url": "https://www.youtube.com/watch?v=kKtTyYEqat0"
+    },
+    {
+      "title": "[입덕영상] 비 깡 레전드 댓글 모음집 4탄",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "웃긴 댓글 모음집: 웃고 싶을때 오세요",
+      "dropdownTitle": "비 깡 레전드 댓글 모음집 4탄",
+      "url": "https://www.youtube.com/watch?v=icLGoC6f18s"
+    },
+    {
+      "title": "[입덕영상] 비 깡 레전드 댓글 모음집 5탄",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "웃긴 댓글 모음집: 웃고 싶을때 오세요",
+      "dropdownTitle": "비 깡 레전드 댓글 모음집 5탄",
+      "url": "https://www.youtube.com/watch?v=6BI__Ki1kI4"
+    },
+    {
+      "title": "[입덕영상] 비 깡 레전드 댓글 모음집 6탄",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "웃긴 댓글 모음집: 웃고 싶을때 오세요",
+      "dropdownTitle": "비 깡 레전드 댓글 모음집 6탄",
+      "url": "https://www.youtube.com/watch?v=zRaMS5s7npk"
+    },
+    {
+      "title": "[입덕영상] 비 깡 레전드 댓글 모음집 7탄",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "웃긴 댓글 모음집: 웃고 싶을때 오세요",
+      "dropdownTitle": "비 깡 레전드 댓글 모음집 7탄",
+      "url": "https://www.youtube.com/watch?v=9_Cv0BjCF5E"
+    },
+    {
+      "title": "비 깡에는 한국 다람쥐와 얽힌 슬픈 전설이 있어...",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "웃긴 댓글 모음집: 웃고 싶을때 오세요",
+      "dropdownTitle": "비 깡에는 슬픈 전설이 있어...",
+      "url": "https://www.youtube.com/watch?v=qdtEdVfgXSM"
+    },
+    {
+      "title": "1일 1깡 여고생의 깡 Gang-cover (full version)",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "호박전시현",
+      "dropdownTitle": "1일 1깡 여고생의 깡",
+      "url": "https://www.youtube.com/watch?v=EhvgveSr30M&t"
+    },
+    {
+      "title": "[팬심] 비의 문제의 곡 '깡' 은 왜 때문에 까이는걸까.",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "루다의 댄스 연구소",
+      "dropdownTitle": "'깡' 은 왜 때문에 까이는걸까.",
+      "url": "https://www.youtube.com/watch?v=_Yw2MH61jac"
+    },
+    {
+      "title": "'한국인 1일 1깡 챌린지?' 비의 '깡' 댓글을 보고 충격받은 미국인의 반응",
+      "artist": "비(Rain)",
+      "music": "깡(GGANG)",
+      "Publisher": "BODA",
+      "dropdownTitle": "'한국인 1일 1깡 챌린지?' 미국인의 반응",
+      "url": "https://www.youtube.com/watch?v=vpmRzIcC5co"
     },
   ];
   int currVideoIndex = 0;
 
   // 광고 관련
-
+  bool isRewardAdbLoad = false;
   static MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
     keywords: <String>['flutter', 'firebase', 'admob'],
     testDevices: <String>[],
@@ -72,12 +169,15 @@ class MyApp extends State<MainPage> {
   }
 
   void initEvent() async {
+    print("여길 안들어온다고??");
+
     // 동영상 초기화
     initVieoPlayer();
 
     // 광고 초기화
     // initBannerAdv();
     initRewardAdv();
+    initRewardListener();
 
     // 공유 데이터 초기화
     await initSharedData();
@@ -187,11 +287,13 @@ class MyApp extends State<MainPage> {
   }
 
   // 리워드 광고를 초기화 해줍니다.
-  void initRewardAdv() {
-    RewardedVideoAd.instance.load(
-      adUnitId: RewardedVideoAd.testAdUnitId,
-      targetingInfo: targetingInfo,
-    );
+  void initRewardAdv() async {
+    await RewardedVideoAd.instance
+        .load(
+          adUnitId: RewardedVideoAd.testAdUnitId,
+          targetingInfo: targetingInfo,
+        )
+        .catchError((e) => print("error in loading 1st time"));
   }
 
   void initRewardListener() {
@@ -199,26 +301,34 @@ class MyApp extends State<MainPage> {
         (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
       print("Rewarded Video Ad event $event");
       if (event == RewardedVideoAdEvent.rewarded) {
-        showToastMsg("아싸~ 오늘은 포카칩이다. 🥔🥔🥔");
+        showToastMsg("아싸~ 오늘은 새우'깡'이다. 🦐🦐🦐");
+      } else if (event == RewardedVideoAdEvent.closed) {
+        setState(() => isRewardAdbLoad = false);
+        initRewardAdv();
+      } else if (event == RewardedVideoAdEvent.loaded) {
+        setState(() => isRewardAdbLoad = true);
       }
     };
   }
 
-  void runRewardAdv() {
-    initRewardListener();
-    RewardedVideoAd.instance.show();
+  void runRewardAdv() async {
+    await RewardedVideoAd.instance
+        .show()
+        .catchError((e) => print("에러: ${e.toString()}"));
+    print("isRewardAdbLoad : ${isRewardAdbLoad}");
   }
 
   // 토스트 메세지를 보여줍니다.
   void showToastMsg(String msg) {
     Fluttertoast.showToast(
-        msg: msg,
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 3,
-        backgroundColor: Colors.cyan,
-        textColor: Colors.white,
-        fontSize: 16.0);
+      msg: msg,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 3,
+      backgroundColor: Colors.cyan,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
   }
 
   // 동영상 플레이어를 초기화 해줍니다.
@@ -340,22 +450,22 @@ class MyApp extends State<MainPage> {
                 bottom: TabBar(
                   tabs: [
                     Tab(
-                      child: Text(
-                        "메인",
-                        style: TextStyle(fontSize: 16),
-                      ),
+                      child: Text("메인",
+                          style: GoogleFonts.notoSans(
+                              textStyle: TextStyle(fontSize: 16),
+                              locale: Locale("ko"))),
                     ),
                     Tab(
                       child: Text(
                         "설정",
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
+                        style: GoogleFonts.notoSans(
+                            textStyle: TextStyle(fontSize: 16),
+                            locale: Locale("ko")),
                       ),
                     ),
                   ],
                 ),
-                title: Text('Tabs Demo'),
+                title: Text(' '),
               ),
               body: Container(
                 // Padding(
@@ -394,38 +504,40 @@ class MyApp extends State<MainPage> {
                                             CrossAxisAlignment.start,
                                         children: <Widget>[
                                           Center(
-                                            child: DropdownButton<String>(
-                                                // value: videoArr[currVideoIndex]["dropdownTitle"],
-                                                value:
-                                                    currVideoIndex.toString(),
-                                                isExpanded: true,
-                                                onChanged: (String string) =>
-                                                    onChangeDrobox(
-                                                        int.parse(string)),
-                                                selectedItemBuilder:
-                                                    (BuildContext context) {
-                                                  return videoArr.map<Widget>(
-                                                      (Map<String, String>
-                                                          item) {
-                                                    return Text(
-                                                        item["dropdownTitle"]);
-                                                  }).toList();
-                                                },
-                                                items: videoArr
-                                                    .asMap()
-                                                    .entries
-                                                    .map((entry) {
-                                                  int idx = entry.key;
-                                                  Map<String, String> val =
-                                                      entry.value;
+                                            child: Padding(
+                                                padding: EdgeInsets.fromLTRB(
+                                                    20, 0, 20, 0),
+                                                child: DropdownButton<String>(
+                                                    value: currVideoIndex
+                                                        .toString(),
+                                                    isExpanded: true,
+                                                    onChanged: (String
+                                                            string) =>
+                                                        onChangeDrobox(
+                                                            int.parse(string)),
+                                                    items: videoArr
+                                                        .asMap()
+                                                        .entries
+                                                        .map((entry) {
+                                                      int idx = entry.key;
+                                                      Map<String, String> val =
+                                                          entry.value;
 
-                                                  return DropdownMenuItem<
-                                                      String>(
-                                                    child: Text(
-                                                        val["dropdownTitle"]),
-                                                    value: idx.toString(),
-                                                  );
-                                                }).toList()),
+                                                      return DropdownMenuItem<
+                                                          String>(
+                                                        child: Text(
+                                                          val["dropdownTitle"],
+                                                          style: GoogleFonts.notoSans(
+                                                              textStyle:
+                                                                  TextStyle(
+                                                                      fontSize:
+                                                                          16),
+                                                              locale:
+                                                                  Locale("ko")),
+                                                        ),
+                                                        value: idx.toString(),
+                                                      );
+                                                    }).toList())),
                                           ),
                                           Padding(
                                             padding:
@@ -439,8 +551,10 @@ class MyApp extends State<MainPage> {
                                                 // 타이틀
                                                 Text(
                                                   "출처 : ",
-                                                  style: TextStyle(
-                                                      fontSize: 15,
+                                                  style: GoogleFonts.notoSans(
+                                                      textStyle: TextStyle(
+                                                          fontSize: 15),
+                                                      locale: Locale("ko"),
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: Color.fromRGBO(
@@ -450,12 +564,14 @@ class MyApp extends State<MainPage> {
                                                 Flexible(
                                                   child: Text(
                                                     "${videoArr[currVideoIndex]['url']}",
-                                                    style: TextStyle(
-                                                        fontSize: 14,
+                                                    style: GoogleFonts.notoSans(
+                                                        textStyle: TextStyle(
+                                                            fontSize: 14),
                                                         fontWeight:
                                                             FontWeight.w400,
                                                         color: Color.fromRGBO(
-                                                            153, 153, 153, 1)),
+                                                            153, 153, 153, 1),
+                                                        locale: Locale("ko")),
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                   ),
@@ -475,8 +591,10 @@ class MyApp extends State<MainPage> {
                                                 // 타이틀
                                                 Text(
                                                   "제목 : ",
-                                                  style: TextStyle(
-                                                      fontSize: 15,
+                                                  style: GoogleFonts.notoSans(
+                                                      textStyle: TextStyle(
+                                                          fontSize: 15),
+                                                      locale: Locale("ko"),
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: Color.fromRGBO(
@@ -486,12 +604,14 @@ class MyApp extends State<MainPage> {
                                                 Flexible(
                                                   child: Text(
                                                     "${videoArr[currVideoIndex]['title']}",
-                                                    style: TextStyle(
-                                                        fontSize: 14,
+                                                    style: GoogleFonts.notoSans(
+                                                        textStyle: TextStyle(
+                                                            fontSize: 14),
                                                         fontWeight:
                                                             FontWeight.w400,
                                                         color: Color.fromRGBO(
-                                                            153, 153, 153, 1)),
+                                                            153, 153, 153, 1),
+                                                        locale: Locale("ko")),
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                   ),
@@ -511,8 +631,10 @@ class MyApp extends State<MainPage> {
                                                 // 타이틀
                                                 Text(
                                                   "음악 : ",
-                                                  style: TextStyle(
-                                                      fontSize: 15,
+                                                  style: GoogleFonts.notoSans(
+                                                      textStyle: TextStyle(
+                                                          fontSize: 15),
+                                                      locale: Locale("ko"),
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: Color.fromRGBO(
@@ -522,12 +644,14 @@ class MyApp extends State<MainPage> {
                                                 Flexible(
                                                   child: Text(
                                                     "${videoArr[currVideoIndex]['artist']} - ${videoArr[currVideoIndex]['music']}",
-                                                    style: TextStyle(
-                                                        fontSize: 14,
+                                                    style: GoogleFonts.notoSans(
+                                                        textStyle: TextStyle(
+                                                            fontSize: 14),
                                                         fontWeight:
                                                             FontWeight.w400,
                                                         color: Color.fromRGBO(
-                                                            153, 153, 153, 1)),
+                                                            153, 153, 153, 1),
+                                                        locale: Locale("ko")),
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                   ),
@@ -547,8 +671,10 @@ class MyApp extends State<MainPage> {
                                                 // 타이틀
                                                 Text(
                                                   "게시자 : ",
-                                                  style: TextStyle(
-                                                      fontSize: 15,
+                                                  style: GoogleFonts.notoSans(
+                                                      textStyle: TextStyle(
+                                                          fontSize: 15),
+                                                      locale: Locale("ko"),
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: Color.fromRGBO(
@@ -558,12 +684,14 @@ class MyApp extends State<MainPage> {
                                                 Flexible(
                                                   child: Text(
                                                     "${videoArr[currVideoIndex]['Publisher']}",
-                                                    style: TextStyle(
-                                                        fontSize: 14,
+                                                    style: GoogleFonts.notoSans(
+                                                        textStyle: TextStyle(
+                                                            fontSize: 14),
                                                         fontWeight:
                                                             FontWeight.w400,
                                                         color: Color.fromRGBO(
-                                                            153, 153, 153, 1)),
+                                                            153, 153, 153, 1),
+                                                        locale: Locale("ko")),
                                                     overflow:
                                                         TextOverflow.ellipsis,
                                                   ),
@@ -586,9 +714,18 @@ class MyApp extends State<MainPage> {
                                   height: 60,
                                   child: RaisedButton(
                                     color: Colors.amber,
-                                    child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
-                                        style: TextStyle(fontSize: 16)),
-                                    onPressed: () => runRewardAdv(),
+                                    child: Text(
+                                      isRewardAdbLoad
+                                          ? '개발자👨‍💻를 위해 한번만 눌러주세요💝'
+                                          : "잠시만요....🙏🏻",
+                                      style: GoogleFonts.notoSans(
+                                          textStyle: TextStyle(fontSize: 16),
+                                          locale: Locale("ko")),
+                                    ),
+                                    onPressed: () => isRewardAdbLoad
+                                        ? runRewardAdv()
+                                        : showToastMsg(
+                                            "조금만 있다가 눌러주시겠어요...??😥"),
                                   ),
                                 ),
                               )),
@@ -620,9 +757,20 @@ class MyApp extends State<MainPage> {
                                             Icons.notifications,
                                             color: Colors.grey,
                                           ),
-                                          title: Text("알람 설정"),
-                                          subtitle:
-                                              Text("📫 하루 일 깡을 알람으로 받아보세요"),
+                                          title: Text(
+                                            "알람 설정",
+                                            style: GoogleFonts.notoSans(
+                                                textStyle:
+                                                    TextStyle(fontSize: 18),
+                                                locale: Locale("ko")),
+                                          ),
+                                          subtitle: Text(
+                                            "📫 하루 일 깡을 알람으로 받아보세요",
+                                            style: GoogleFonts.notoSans(
+                                                textStyle:
+                                                    TextStyle(fontSize: 11),
+                                                locale: Locale("ko")),
+                                          ),
                                         )),
                                     Expanded(
                                         flex: 1,
@@ -650,8 +798,20 @@ class MyApp extends State<MainPage> {
                                             Icons.timer,
                                             color: Colors.grey,
                                           ),
-                                          title: Text("알람 시간 설정"),
-                                          subtitle: Text("⏰ 알람 받을 시간을 알려주세요"),
+                                          title: Text(
+                                            "알람 시간 설정",
+                                            style: GoogleFonts.notoSans(
+                                                textStyle:
+                                                    TextStyle(fontSize: 18),
+                                                locale: Locale("ko")),
+                                          ),
+                                          subtitle: Text(
+                                            "⏰ 알람 받을 시간을 알려주세요",
+                                            style: GoogleFonts.notoSans(
+                                                textStyle:
+                                                    TextStyle(fontSize: 11),
+                                                locale: Locale("ko")),
+                                          ),
                                         )),
                                     Expanded(
                                         flex: 1,
@@ -697,9 +857,18 @@ class MyApp extends State<MainPage> {
                                   height: 60,
                                   child: RaisedButton(
                                     color: Colors.amber,
-                                    child: Text('개발자👨‍💻를 위해 한번만 눌러주세요💝',
-                                        style: TextStyle(fontSize: 16)),
-                                    onPressed: () => runRewardAdv(),
+                                    child: Text(
+                                      isRewardAdbLoad
+                                          ? '개발자👨‍💻를 위해 한번만 눌러주세요💝'
+                                          : "잠시만요....🙏🏻",
+                                      style: GoogleFonts.notoSans(
+                                          textStyle: TextStyle(fontSize: 16),
+                                          locale: Locale("ko")),
+                                    ),
+                                    onPressed: () => isRewardAdbLoad
+                                        ? runRewardAdv()
+                                        : showToastMsg(
+                                            "조금만 있다가 눌러주시겠어요...??😥"),
                                   ),
                                 ),
                               )),
