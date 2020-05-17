@@ -1,4 +1,4 @@
-package com.example.oneday_oneggang
+package com.noogoonaa.oneday_oneggang
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

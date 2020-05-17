@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.oneday_oneggang">
+    package="com.noogoonaa.oneday_oneggang">
     <!-- Flutter needs it to communicate with the running application to allow setting breakpoints, to provide hot reload, etc. -->
     <!-- local notification 1 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
