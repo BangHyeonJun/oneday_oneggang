@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:firebase_admob/firebase_admob.dart';
+// import 'package:firebase_admob/firebase_admob.dart';
 
 void main() => runApp(new MaterialApp(home: MainPage()));
 
@@ -146,19 +146,21 @@ class MyApp extends State<MainPage> {
   ];
   int currVideoIndex = 0;
 
-  // 광고 관련
-  bool isRewardAdbLoad = false;
-  static MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
-    keywords: <String>['flutter', 'firebase', 'admob'],
-    testDevices: <String>[],
-  );
-  BannerAd bannerAd = BannerAd(
-      adUnitId: BannerAd.testAdUnitId,
-      size: AdSize.fullBanner,
-      targetingInfo: targetingInfo,
-      listener: (MobileAdEvent event) {
-        print("BannerAd event is $event");
-      });
+  // 광고 관련(추후 수정 필요)
+  // bool isRewardAdbLoad = false;
+  // static MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
+  //   keywords: <String>['flutter', 'firebase', 'admob'],
+  //   testDevices: <String>[],
+  // );
+  // BannerAd bannerAd = BannerAd(
+  //     adUnitId: BannerAd.testAdUnitId,
+  //     size: AdSize.fullBanner,
+  //     targetingInfo: targetingInfo,
+  //     listener: (MobileAdEvent event) {
+  //       print("BannerAd event is $event");
+  //     });
+  // 이 변수 광고 에러 해결 후 추후 삭제 아래 isRewardAdbLoad 
+  bool isRewardAdbLoad = true;
 
   // 앱 실행 시 처음 시작되는 부분
   @override
@@ -174,12 +176,12 @@ class MyApp extends State<MainPage> {
     // 동영상 초기화
     initVieoPlayer();
 
-    // 광고 초기화
-    // initBannerAdv();
-    initRewardAdv();
-    initRewardListener();
+    // // 광고 초기화
+    // // initBannerAdv();
+    // initRewardAdv();
+    // initRewardListener();
 
-    // 공유 데이터 초기화
+    // // 공유 데이터 초기화
     await initSharedData();
 
     // 공유데이터에서 필요한 아이템 가져오는 부분
@@ -229,13 +231,12 @@ class MyApp extends State<MainPage> {
   }
 
   // notification 초기화
-  void initNotification() async {
+  void initNotification() {
     WidgetsFlutterBinding.ensureInitialized();
   }
 
   // isNotification에 따라 알람 설정 작업
   void notificationEventForIsNotification() {
-    print(isNotification);
     if (isNotification) {
       showNotification(
           notificationTime, notificationTitle, notificationContents);
@@ -245,8 +246,8 @@ class MyApp extends State<MainPage> {
   }
 
   // 모든 알림을 지워줍니다.
-  void removeAllNotification() {
-    FlutterLocalNotificationsPlugin().cancelAll();
+  void removeAllNotification() async {
+    await FlutterLocalNotificationsPlugin().cancelAll();
   }
 
   // 알림을 세팅해 줍니다.
@@ -264,58 +265,61 @@ class MyApp extends State<MainPage> {
     var iOS = IOSNotificationDetails();
     var platform = NotificationDetails(android, iOS);
 
-    await FlutterLocalNotificationsPlugin()
-        .showDailyAtTime(0, title, contents, time, platform);
+    // 예약 알림 오류로 인함 임시 주석
+    await FlutterLocalNotificationsPlugin().show(1, title, contents, platform);
+        // .showDailyAtTime(0, title, contents, time, platform);
   }
 
-  // 베너 광고를 초기화 해줍니다.
+  // 베너 광고를 초기화 해줍니다.(추후 수정 필요)
   void initBannerAdv() {
-    FirebaseAdMob.instance
-        .initialize(appId: "ca-app-pub-4278000043835062~6424902116");
+    // FirebaseAdMob.instance
+    //     .initialize(appId: "ca-app-pub-4278000043835062~6424902116");
   }
 
-  // 베너 광고를 실행시킵니다.
+  // 베너 광고를 실행시킵니다.(추후 수정 필요)
   void runBannerAdv() {
-    bannerAd
-      ..load()
-      ..show(anchorType: AnchorType.bottom, anchorOffset: 0);
+    // bannerAd
+    //   ..load()
+    //   ..show(anchorType: AnchorType.bottom, anchorOffset: 0);
   }
 
-  // 베너 광고를 사라지게 합니다.
+  // 베너 광고를 사라지게 합니다.(추후 수정 필요)
   void hideBannerAdv() {
-    bannerAd..dispose();
+    // bannerAd..dispose();
   }
 
-  // 리워드 광고를 초기화 해줍니다.
+  // 리워드 광고를 초기화 해줍니다.(추후 수정 필요)
   void initRewardAdv() async {
-    await RewardedVideoAd.instance
-        .load(
-          adUnitId: RewardedVideoAd.testAdUnitId,
-          targetingInfo: targetingInfo,
-        )
-        .catchError((e) => print("error in loading 1st time"));
+    // await RewardedVideoAd.instance
+    //     .load(
+    //       adUnitId: RewardedVideoAd.testAdUnitId,
+    //       targetingInfo: targetingInfo,
+    //     )
+    //     .catchError((e) => print("error in loading 1st time"));
   }
 
+  // 리워드 리스너 이벤트 (추후 수정 필요)
   void initRewardListener() {
-    RewardedVideoAd.instance.listener =
-        (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
-      print("Rewarded Video Ad event $event");
-      if (event == RewardedVideoAdEvent.rewarded) {
-        showToastMsg("아싸~ 오늘은 새우'깡'이다. 🦐🦐🦐");
-      } else if (event == RewardedVideoAdEvent.closed) {
-        setState(() => isRewardAdbLoad = false);
-        initRewardAdv();
-      } else if (event == RewardedVideoAdEvent.loaded) {
-        setState(() => isRewardAdbLoad = true);
-      }
-    };
+    // RewardedVideoAd.instance.listener =
+    //     (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
+    //   print("Rewarded Video Ad event $event");
+    //   if (event == RewardedVideoAdEvent.rewarded) {
+    //     showToastMsg("아싸~ 오늘은 새우'깡'이다. 🦐🦐🦐");
+    //   } else if (event == RewardedVideoAdEvent.closed) {
+    //     setState(() => isRewardAdbLoad = false);
+    //     initRewardAdv();
+    //   } else if (event == RewardedVideoAdEvent.loaded) {
+    //     setState(() => isRewardAdbLoad = true);
+    //   }
+    // };
   }
 
+  // 리워드 광고 실행 (추후 수정 필요)
   void runRewardAdv() async {
-    await RewardedVideoAd.instance
-        .show()
-        .catchError((e) => print("에러: ${e.toString()}"));
-    print("isRewardAdbLoad : ${isRewardAdbLoad}");
+    // await RewardedVideoAd.instance
+    //     .show()
+    //     .catchError((e) => print("에러: ${e.toString()}"));
+    // print("isRewardAdbLoad : ${isRewardAdbLoad}");
   }
 
   // 토스트 메세지를 보여줍니다.
@@ -713,13 +717,14 @@ class MyApp extends State<MainPage> {
                                   width: double.infinity,
                                   height: 60,
                                   child: RaisedButton(
-                                    color: Colors.amber,
+                                    color: Colors.blueGrey,
                                     child: Text(
                                       isRewardAdbLoad
                                           ? '개발자👨‍💻를 위해 한번만 눌러주세요💝'
                                           : "잠시만요....🙏🏻",
                                       style: GoogleFonts.notoSans(
                                           textStyle: TextStyle(fontSize: 16),
+                                          color: Colors.white,
                                           locale: Locale("ko")),
                                     ),
                                     onPressed: () => isRewardAdbLoad
@@ -856,13 +861,14 @@ class MyApp extends State<MainPage> {
                                   width: double.infinity,
                                   height: 60,
                                   child: RaisedButton(
-                                    color: Colors.amber,
+                                    color: Colors.blueGrey,
                                     child: Text(
                                       isRewardAdbLoad
                                           ? '개발자👨‍💻를 위해 한번만 눌러주세요💝'
                                           : "잠시만요....🙏🏻",
                                       style: GoogleFonts.notoSans(
                                           textStyle: TextStyle(fontSize: 16),
+                                          color: Colors.white,
                                           locale: Locale("ko")),
                                     ),
                                     onPressed: () => isRewardAdbLoad
