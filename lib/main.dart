@@ -25,6 +25,7 @@ class MyApp extends State<MainPage> {
   Time notificationTime = new Time();
   String strNotificationTime;
   bool isNotification = false;
+  NotificationDetails platform;
   String notificationTitle = "꾸러기 표정 비 ☔";
   String notificationContents = "오늘도 하루 일 깡을 하실 시간입니다. 🕴🕺";
 
@@ -120,14 +121,6 @@ class MyApp extends State<MainPage> {
       "url": "https://www.youtube.com/watch?v=qdtEdVfgXSM"
     },
     {
-      "title": "1일 1깡 여고생의 깡 Gang-cover (full version)",
-      "artist": "비(Rain)",
-      "music": "깡(GGANG)",
-      "Publisher": "호박전시현",
-      "dropdownTitle": "1일 1깡 여고생의 깡",
-      "url": "https://www.youtube.com/watch?v=EhvgveSr30M&t"
-    },
-    {
       "title": "[팬심] 비의 문제의 곡 '깡' 은 왜 때문에 까이는걸까.",
       "artist": "비(Rain)",
       "music": "깡(GGANG)",
@@ -190,7 +183,8 @@ class MyApp extends State<MainPage> {
 
     // 알림 초기화
     initNotification();
-    notificationEventForIsNotification();
+    // showNotification();
+    // notificationEventForIsNotification();
   }
 
   // 공유 데이터 초기화
@@ -204,14 +198,14 @@ class MyApp extends State<MainPage> {
     int minute = _prefs.getInt('minute') ?? 0;
     int second = _prefs.getInt('second') ?? 0;
 
-    notificationTime = Time(hour, minute, second);
+    setState(() => (notificationTime  = Time(hour, minute, second)));
   }
 
   // 공유 데이터에 Notification 설정 여부를 확인
   void initSharedIsNotification() {
     bool isNoti = _prefs.getBool('isNotification') ?? true;
 
-    isNotification = isNoti;
+    setState(() => (isNotification  = isNoti));
   }
 
   // 공유 데이터에 notification 시간을 저장합니다.
@@ -227,18 +221,32 @@ class MyApp extends State<MainPage> {
   void seIstNotification(bool isNoti) {
     _prefs.setBool("isNotification", isNoti);
 
-    isNotification = isNoti;
+
+    setState(() => (isNotification  = isNoti));
   }
 
   // notification 초기화
-  void initNotification() {
+  void initNotification() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    var initAndroidSetting =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initIosSetting = IOSInitializationSettings();
+    var initSetting =
+        InitializationSettings(initAndroidSetting, initIosSetting);
+    await FlutterLocalNotificationsPlugin().initialize(initSetting);
+
+    var android = AndroidNotificationDetails(
+        'channelId', 'channelName', 'channelDescription');
+    var iOS = IOSNotificationDetails();
+    platform = NotificationDetails(android, iOS);
+
   }
 
   // isNotification에 따라 알람 설정 작업
   void notificationEventForIsNotification() {
     if (isNotification) {
-      showNotification(
+      setNotification(
           notificationTime, notificationTitle, notificationContents);
     } else {
       removeAllNotification();
@@ -250,24 +258,16 @@ class MyApp extends State<MainPage> {
     await FlutterLocalNotificationsPlugin().cancelAll();
   }
 
+  // Future<void> showNotification(
+  //     Time time, String title, String contents) async {
+  //   // 예약 알림 오류로 인함 임시 주석
+  //   // await FlutterLocalNotificationsPlugin().show(1, title, contents, platform);
+  //       // .showDailyAtTime(0, title, contents, time, platform);
+  // }
+
   // 알림을 세팅해 줍니다.
-  Future<void> showNotification(
-      Time time, String title, String contents) async {
-    var initAndroidSetting =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initIosSetting = IOSInitializationSettings();
-    var initSetting =
-        InitializationSettings(initAndroidSetting, initIosSetting);
-    await FlutterLocalNotificationsPlugin().initialize(initSetting);
-
-    var android = AndroidNotificationDetails(
-        'channelId', 'channelName', 'channelDescription');
-    var iOS = IOSNotificationDetails();
-    var platform = NotificationDetails(android, iOS);
-
-    // 예약 알림 오류로 인함 임시 주석
-    await FlutterLocalNotificationsPlugin().show(1, title, contents, platform);
-        // .showDailyAtTime(0, title, contents, time, platform);
+  Future<void> setNotification(Time time, String title, String contents) async {
+        await FlutterLocalNotificationsPlugin().showDailyAtTime(0, title, contents, time, platform);
   }
 
   // 베너 광고를 초기화 해줍니다.(추후 수정 필요)
@@ -380,9 +380,13 @@ class MyApp extends State<MainPage> {
 
   // 라디오 버튼
   void onChangeIsNotification(bool value) {
-    setState(() => isNotification = value);
-
     seIstNotification(value);
+
+    if(value){
+      setNotification(notificationTime, notificationTitle, notificationContents);
+    }else {
+      removeAllNotification();
+    }
     notificationEventForIsNotification();
   }
 
@@ -400,7 +404,7 @@ class MyApp extends State<MainPage> {
       int second = date.second;
 
       setNotificationTime(hour, minute, second);
-      notificationEventForIsNotification();
+      setNotification(notificationTime, notificationTitle, notificationContents);
     },
         currentTime: DateTime.utc(
             now.year,
