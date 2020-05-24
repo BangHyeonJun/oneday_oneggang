@@ -9,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:permission_handler/permission_handler.dart';
+
 // import 'package:firebase_admob/firebase_admob.dart';
 
 void main() => runApp(new MaterialApp(home: MainPage()));
@@ -25,9 +27,9 @@ class MyApp extends State<MainPage> {
   Time notificationTime = new Time();
   String strNotificationTime;
   bool isNotification = false;
-  NotificationDetails platform;
   String notificationTitle = "꾸러기 표정 비 ☔";
   String notificationContents = "오늘도 하루 일 깡을 하실 시간입니다. 🕴🕺";
+  
 
   // 동영상 관련
   YoutubePlayerController _controller;
@@ -164,6 +166,8 @@ class MyApp extends State<MainPage> {
   }
 
   void initEvent() async {
+    permission();
+
     print("여길 안들어온다고??");
 
     // 동영상 초기화
@@ -185,6 +189,22 @@ class MyApp extends State<MainPage> {
     initNotification();
     // showNotification();
     // notificationEventForIsNotification();
+  }
+
+  // 퍼미션 관련
+  void permission() async {
+    var status = await Permission.camera.status;
+    print(status.isUndetermined);
+    if (status.isUndetermined) {
+      // We didn't ask for permission yet.
+      // You can request multiple permissions at once.
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.location,
+        Permission.storage,
+      ].request();
+      print("g히히히히");
+      print(statuses[Permission.location]);
+    }
   }
 
   // 공유 데이터 초기화
@@ -226,28 +246,27 @@ class MyApp extends State<MainPage> {
   }
 
   // notification 초기화
-  void initNotification() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  var initializationSettingsAndroid;
+  var initializationSettingsIOS;
+  var initializationSettings;
+  Future<void> initNotification() async {
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+    initializationSettingsIOS = IOSInitializationSettings();
+    initializationSettings = InitializationSettings(initializationSettingsAndroid, initializationSettingsIOS);
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: selectNotification);
+  }
 
-    var initAndroidSetting =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initIosSetting = IOSInitializationSettings();
-    var initSetting =
-        InitializationSettings(initAndroidSetting, initIosSetting);
-    await FlutterLocalNotificationsPlugin().initialize(initSetting);
-
-    var android = AndroidNotificationDetails(
-        'channelId', 'channelName', 'channelDescription');
-    var iOS = IOSNotificationDetails();
-    platform = NotificationDetails(android, iOS);
+  Future selectNotification(String payload) async {
 
   }
 
   // isNotification에 따라 알람 설정 작업
   void notificationEventForIsNotification() {
     if (isNotification) {
-      setNotification(
-          notificationTime, notificationTitle, notificationContents);
+      // setNotification(
+          // notificationTime, notificationTitle, notificationContents);
     } else {
       removeAllNotification();
     }
@@ -267,7 +286,10 @@ class MyApp extends State<MainPage> {
 
   // 알림을 세팅해 줍니다.
   Future<void> setNotification(Time time, String title, String contents) async {
-        await FlutterLocalNotificationsPlugin().showDailyAtTime(0, title, contents, time, platform);
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails('repeatDailyAtTime channel id', 'repeatDailyAtTime channel name', 'repeatDailyAtTime description');
+    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+    var platformChannelSpecifics = NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.showDailyAtTime(0, title, contents, time, platformChannelSpecifics);
   }
 
   // 베너 광고를 초기화 해줍니다.(추후 수정 필요)
@@ -383,7 +405,7 @@ class MyApp extends State<MainPage> {
     seIstNotification(value);
 
     if(value){
-      setNotification(notificationTime, notificationTitle, notificationContents);
+      // setNotification(notificationTime, notificationTitle, notificationContents);
     }else {
       removeAllNotification();
     }
